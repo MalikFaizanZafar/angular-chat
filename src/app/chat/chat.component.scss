@@ -27,10 +27,14 @@ body {
 
 .people-list {
   width:260px;
-  float: left;
+  // float: left;
+  position: fixed;
+  right: .25%;
+  top: 5%;
+  background-color: #f0f0f0;
   
   .search {
-    padding: 20px;
+    padding: 10px;
   }
   
   input {
@@ -52,9 +56,6 @@ body {
     padding: 20px;
     height: 770px;
     list-style-type: none !important;
- 
-    
-    
     
     li {
       padding-bottom: 20px;
@@ -93,7 +94,7 @@ body {
   background: #F2F5F8;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
-  animation: hideChatBox 1500ms ease-out both;
+  animation: hideChatBox .5s ease-out both;
 }
 
 @keyframes showChatBox {
@@ -113,11 +114,11 @@ body {
   border-bottom-right-radius: 5px;
   // animation: showChatBox 1500ms ease-in-out both;
   // opacity: 0;
-  transition: right 1s ease;
+  transition: right .5s ease;
   
   &-show {
     // opacity: 1;
-    right: 50px;
+    right: 270px;
     // left: 75%;
     // transform: translateX(0px);
   }
@@ -285,3 +286,9 @@ body {
 	height: 0;
 }
 
+.user__list__li {
+  cursor: pointer;
+}
+.user__list__li:hover {
+  background-color: #c9c9c9;
+}
