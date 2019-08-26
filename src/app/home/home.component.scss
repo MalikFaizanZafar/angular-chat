@@ -173,3 +173,51 @@ text.axis-worktime {
 .link:hover {
   stroke-opacity: .5;
 }
+
+.slice {
+  cursor: pointer;
+}
+
+.slice .main-arc {
+  stroke: #fff;
+  stroke-width: 1px;
+}
+
+.slice .hidden-arc {
+  fill: none;
+}
+
+.slice text {
+  pointer-events: none;
+  dominant-baseline: middle;
+  text-anchor: middle;
+}
+
+
+#container {
+  height: 400px;
+}
+
+@keyframes pulse {
+  from { opacity: 1; }
+  50% { opacity: 0.3 }
+  to { opacity: 1 }
+}
+
+path:nth-child( 3 ) {
+  animation-name: pulse;
+  animation-delay: 0s;
+  animation-iteration-count: infinite;
+  animation-direction: forward;
+  animation-duration: 2s;
+  animation-timing-function: ease-in-out;
+}
+
+.bubbles {
+  stroke-width: 1px;
+  stroke: black;
+  opacity: .8
+}
+.bubbles:hover {
+  stroke: black;
+}

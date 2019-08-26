@@ -24,8 +24,10 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.drawHeatMap();
-    this.drawSankeyDiagram();
+    // this.drawHeatMap();
+    // this.drawSankeyDiagram();
+    // this.drawSunburstDiagram();
+    this.drawScatterBubble();
   }
 
   drawHeatMap() {
@@ -885,6 +887,281 @@ export class HomeComponent implements OnInit {
         link.attr("d", path);
       }
     });
+  }
+
+  drawSunburstDiagram() {
+    const width = window.innerWidth,
+      height = window.innerHeight,
+      maxRadius = Math.min(width, height) / 2 - 5;
+
+    const formatNumber = d3.format(",d");
+
+    const x = d3
+      .scaleLinear()
+      .range([0, 2 * Math.PI])
+      .clamp(true);
+
+    const y = d3.scaleSqrt().range([maxRadius * 0.1, maxRadius]);
+
+    const color = d3.scaleOrdinal(d3.schemeCategory20);
+
+    const partition = d3.partition();
+
+    const arc = d3
+      .arc()
+      .startAngle(d => x(d.x0))
+      .endAngle(d => x(d.x1))
+      .innerRadius(d => Math.max(0, y(d.y0)))
+      .outerRadius(d => Math.max(0, y(d.y1)));
+
+    const middleArcLine = d => {
+      const halfPi = Math.PI / 2;
+      const angles = [x(d.x0) - halfPi, x(d.x1) - halfPi];
+      const r = Math.max(0, (y(d.y0) + y(d.y1)) / 2);
+
+      const middleAngle = (angles[1] + angles[0]) / 2;
+      const invertDirection = middleAngle > 0 && middleAngle < Math.PI; // On lower quadrants write text ccw
+      if (invertDirection) {
+        angles.reverse();
+      }
+
+      const path = d3.path();
+      path.arc(0, 0, r, angles[0], angles[1], invertDirection);
+      return path.toString();
+    };
+
+    const textFits = d => {
+      const CHAR_SPACE = 6;
+
+      const deltaAngle = x(d.x1) - x(d.x0);
+      const r = Math.max(0, (y(d.y0) + y(d.y1)) / 2);
+      const perimeter = r * deltaAngle;
+
+      return d.data.name.length * CHAR_SPACE < perimeter;
+    };
+
+    const svg = d3
+      .select("#sunburst")
+      .append("svg")
+      .style("width", "100vw")
+      .style("height", "100vh")
+      .attr("viewBox", `${-width / 2} ${-height / 2} ${width} ${height}`)
+      .on("click", () => focusOn()); // Reset zoom on canvas click
+
+    d3.json(
+      "https://gist.githubusercontent.com/mbostock/4348373/raw/85f18ac90409caa5529b32156aa6e71cf985263f/flare.json",
+      (error, root) => {
+        if (error) throw error;
+
+        root = d3.hierarchy(root);
+        root.sum(d => d.size);
+
+        const slice = svg
+          .selectAll("g.slice")
+          .data(partition(root).descendants());
+
+        slice.exit().remove();
+
+        const newSlice = slice
+          .enter()
+          .append("g")
+          .attr("class", "slice")
+          .on("click", d => {
+            d3.event.stopPropagation();
+            focusOn(d);
+          });
+
+        newSlice
+          .append("title")
+          .text(d => d.data.name + "\n" + formatNumber(d.value));
+
+        newSlice
+          .append("path")
+          .attr("class", "main-arc")
+          .style("fill", d => color((d.children ? d : d.parent).data.name))
+          .attr("d", arc);
+
+        newSlice
+          .append("path")
+          .attr("class", "hidden-arc")
+          .attr("id", (_, i) => `hiddenArc${i}`)
+          .attr("d", middleArcLine);
+
+        const text = newSlice
+          .append("text")
+          .attr("display", d => (textFits(d) ? null : "none"));
+
+        // Add white contour
+        text
+          .append("textPath")
+          .attr("startOffset", "50%")
+          .attr("xlink:href", (_, i) => `#hiddenArc${i}`)
+          .text(d => d.data.name)
+          .style("fill", "none")
+          .style("stroke", "#fff")
+          .style("stroke-width", 5)
+          .style("stroke-linejoin", "round");
+
+        text
+          .append("textPath")
+          .attr("startOffset", "50%")
+          .attr("xlink:href", (_, i) => `#hiddenArc${i}`)
+          .text(d => d.data.name);
+      }
+    );
+
+    function focusOn(d = { x0: 0, x1: 1, y0: 0, y1: 1 }) {
+      // Reset to top-level if no data point specified
+
+      const transition = svg
+        .transition()
+        .duration(750)
+        .tween("scale", () => {
+          const xd = d3.interpolate(x.domain(), [d.x0, d.x1]),
+            yd = d3.interpolate(y.domain(), [d.y0, 1]);
+          return t => {
+            x.domain(xd(t));
+            y.domain(yd(t));
+          };
+        });
+
+      transition.selectAll("path.main-arc").attrTween("d", d => () => arc(d));
+
+      transition
+        .selectAll("path.hidden-arc")
+        .attrTween("d", d => () => middleArcLine(d));
+
+      transition
+        .selectAll("text")
+        .attrTween("display", d => () => (textFits(d) ? null : "none"));
+
+      moveStackToFront(d);
+
+      //
+
+      function moveStackToFront(elD) {
+        svg
+          .selectAll(".slice")
+          .filter(d => d === elD)
+          .each(function(d) {
+            this.parentNode.appendChild(this);
+            if (d.parent) {
+              moveStackToFront(d.parent);
+            }
+          });
+      }
+    }
+  }
+
+  drawScatterBubble() {
+    var margin = { top: 10, right: 30, bottom: 40, left: 50 },
+      width = 520 - margin.left - margin.right,
+      height = 520 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3
+      .select("#scatter")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Add the grey background that makes ggplot2 famous
+    svg
+      .append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("height", height)
+      .attr("width", height)
+      .style("fill", "EBEBEB");
+
+    //Read the data
+    d3.csv(
+      "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/iris.csv",
+      function(data) {
+        // Add X axis
+        var x = d3
+          .scaleLinear()
+          .domain([4 * 0.95, 8 * 1.001])
+          .range([0, width]);
+        svg
+          .append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(
+            d3
+              .axisBottom(x)
+              .tickSize(-height * 1.3)
+              .ticks(10)
+          )
+          .select(".domain")
+          .remove();
+
+        // Add Y axis
+        var y = d3
+          .scaleLinear()
+          .domain([-0.001, 9 * 1.01])
+          .range([height, 0])
+          .nice();
+        svg
+          .append("g")
+          .call(
+            d3
+              .axisLeft(y)
+              .tickSize(-width * 1.3)
+              .ticks(7)
+          )
+          .select(".domain")
+          .remove();
+
+        // Customization
+        svg.selectAll(".tick line").attr("stroke", "white");
+
+        // Add X axis label:
+        svg
+          .append("text")
+          .attr("text-anchor", "end")
+          .attr("x", width / 2 + margin.left)
+          .attr("y", height + margin.top + 20)
+          .text("Sepal Length");
+
+        // Y axis label:
+        svg
+          .append("text")
+          .attr("text-anchor", "end")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -margin.left + 20)
+          .attr("x", -margin.top - height / 2 + 20)
+          .text("Petal Length");
+
+        // Color scale: give me a specie name, I return a color
+        var color = d3
+          .scaleOrdinal()
+          .domain(["setosa", "versicolor", "virginica"])
+          .range(["#F8766D", "#00BA38", "#619CFF"]);
+
+        // Add dots
+        svg
+          .append("g")
+          .selectAll("dot")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("cx", function(d) {
+            return x(d.Sepal_Length);
+          })
+          .attr("cy", function(d) {
+            return y(d.Petal_Length);
+          })
+          .attr("r", function(d){
+            console.log("d is : ", d)
+            return parseFloat(d.Sepal_Length)
+          })
+          .style("fill", function(d) {
+            return color(d.Species);
+          });
+      }
+    );
   }
 
   signInWithGoogle() {
