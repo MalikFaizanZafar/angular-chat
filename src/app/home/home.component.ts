@@ -30,6 +30,35 @@ export class HomeComponent implements OnInit {
     // this.drawScatterBubble();
     // this.drawPieChart();
     this.drawPieChartTwo();
+    this.drawArcDiagram();
+  }
+
+  signInWithGoogle() {
+    this.afAuth.auth
+      .signInWithPopup(new auth.GoogleAuthProvider())
+      .then(result => {
+        let user = {
+          id: "",
+          socialId: result.additionalUserInfo.profile["id"],
+          password: "12345",
+          token: result.credential["accessToken"],
+          name: result.user.displayName,
+          email: result.user.email,
+          photo: result.user.photoURL,
+          gender: "",
+          birthday: ""
+        };
+        this.db.database
+          .ref("users")
+          .push(user)
+          .then(data => {
+            // console.log("data is : ", data.key);
+            user.id = data.key;
+            this.userService.setUser(user);
+            localStorage.setItem("chat-user", JSON.stringify(user));
+            this.ngZone.run(() => this.router.navigate(["chat"]));
+          });
+      });
   }
 
   drawHeatMap() {
@@ -1166,186 +1195,186 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  // drawPieChart() {
-  //   var width = 300,
-  //     height = 300,
-  //     radius = Math.min(width, height) / 2;
+  drawPieChart() {
+    var width = 300,
+      height = 300,
+      radius = Math.min(width, height) / 2;
 
-  //   var color = d3.scaleOrdinal().range(["#6fc9e1", "#00627d", "#179bbf"]);
+    var color = d3.scaleOrdinal().range(["#6fc9e1", "#00627d", "#179bbf"]);
 
-  //   var biggestarc = d3
-  //     .arc()
-  //     .outerRadius(radius - 100)
-  //     .innerRadius(radius - 60);
+    var biggestarc = d3
+      .arc()
+      .outerRadius(radius - 100)
+      .innerRadius(radius - 60);
 
-  //   var bigarc = d3
-  //     .arc()
-  //     .outerRadius(radius - 100)
-  //     .innerRadius(radius - 60);
+    var bigarc = d3
+      .arc()
+      .outerRadius(radius - 100)
+      .innerRadius(radius - 60);
 
-  //   var smallarc = d3
-  //     .arc()
-  //     .outerRadius(radius - 100)
-  //     .innerRadius(radius - 60);
+    var smallarc = d3
+      .arc()
+      .outerRadius(radius - 100)
+      .innerRadius(radius - 60);
 
-  //   /*var biggerarc = d3.svg.arc()
-  //   .outerRadius(radius - 80)
-  //   .innerRadius(radius - 70);*/
+    /*var biggerarc = d3.svg.arc()
+    .outerRadius(radius - 80)
+    .innerRadius(radius - 70);*/
 
-  //   var pie = d3
-  //     .pie()
-  //     .sort(null)
+    var pie = d3
+      .pie()
+      .sort(null)
 
-  //     .value(function(d) {
-  //       return d.percent;
-  //     });
+      .value(function(d) {
+        return d.percent;
+      });
 
-  //   var svg = d3
-  //     .select("#pie")
-  //     .append("svg")
-  //     .attr("width", width)
-  //     .attr("height", height)
-  //     .append("g")
-  //     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+    var svg = d3
+      .select("#pie")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g")
+      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-  //   var data = [
-  //     {
-  //       label: "Biggest",
-  //       percent: 33
-  //     },
-  //     {
-  //       label: "Big",
-  //       percent: 17
-  //     },
-  //     {
-  //       label: "Small",
-  //       percent: 50
-  //     }
-  //   ];
+    var data = [
+      {
+        label: "Biggest",
+        percent: 33
+      },
+      {
+        label: "Big",
+        percent: 17
+      },
+      {
+        label: "Small",
+        percent: 50
+      }
+    ];
 
-  //   var piedata = pie(data);
+    var piedata = pie(data);
 
-  //   var g = svg
-  //     .selectAll(".arc")
-  //     .data(piedata)
-  //     .enter()
-  //     .append("g")
-  //     .attr("class", "arc");
+    var g = svg
+      .selectAll(".arc")
+      .data(piedata)
+      .enter()
+      .append("g")
+      .attr("class", "arc");
 
-  //   g.append("path")
-  //     .attr("d", function(d) {
-  //       if (d.data.label == "Biggest") {
-  //         return biggestarc(d);
-  //       } else if (d.data.label == "Big") {
-  //         return bigarc(d);
-  //       } else {
-  //         return smallarc(d);
-  //       }
-  //     })
-  //     .style("fill", function(d) {
-  //       return color(d.data.label);
-  //     });
+    g.append("path")
+      .attr("d", function(d) {
+        if (d.data.label == "Biggest") {
+          return biggestarc(d);
+        } else if (d.data.label == "Big") {
+          return bigarc(d);
+        } else {
+          return smallarc(d);
+        }
+      })
+      .style("fill", function(d) {
+        return color(d.data.label);
+      });
 
-  //   g.append("text") //add a label to each slice
-  //     .attr("transform", function(d) {
-  //       //set the label's origin to the center of the arc
-  //       d.innerRadius = 0;
-  //       d.outerRadius = radius;
-  //       if (d.data.label == "Biggest") {
-  //         return "translate(" + biggestarc.centroid(d) + ")";
-  //       } else if (d.data.label == "Big") {
-  //         return "translate(" + bigarc.centroid(d) + ")";
-  //       } else {
-  //         return "translate(" + smallarc.centroid(d) + ")";
-  //       }
-  //     })
-  //     .attr("text-anchor", "middle")
-  //     .text(function(d, i) {
-  //       return data[i].percent + "%";
-  //     });
+    g.append("text") //add a label to each slice
+      .attr("transform", function(d) {
+        //set the label's origin to the center of the arc
+        d.innerRadius = 0;
+        d.outerRadius = radius;
+        if (d.data.label == "Biggest") {
+          return "translate(" + biggestarc.centroid(d) + ")";
+        } else if (d.data.label == "Big") {
+          return "translate(" + bigarc.centroid(d) + ")";
+        } else {
+          return "translate(" + smallarc.centroid(d) + ")";
+        }
+      })
+      .attr("text-anchor", "middle")
+      .text(function(d, i) {
+        return data[i].percent + "%";
+      });
 
-  //   var labels = g.append("g").classed("labels", true);
+    var labels = g.append("g").classed("labels", true);
 
-  //   labels
-  //     .selectAll("text")
-  //     .data(piedata)
-  //     .enter()
-  //     .append("text")
-  //     .attr("text-anchor", "middle")
-  //     .attr("x", function(d) {
-  //       var a = d.startAngle + (d.endAngle - d.startAngle) / 2 - Math.PI / 2;
-  //       d.cx = Math.cos(a) * (radius - 75);
-  //       return (d.x = Math.cos(a) * (radius - 20));
-  //     })
-  //     .attr("y", function(d) {
-  //       var a = d.startAngle + (d.endAngle - d.startAngle) / 2 - Math.PI / 2;
-  //       d.cy = Math.sin(a) * (radius - 75);
-  //       return (d.y = Math.sin(a) * (radius - 20));
-  //     })
-  //     .text(function(d) {
-  //       return d.data.label;
-  //     })
-  //     .each(function(d) {
-  //       var bbox = this.getBBox();
-  //       d.sx = d.x - bbox.width / 2 - 2;
-  //       d.ox = d.x + bbox.width / 2 + 2;
-  //       d.sy = d.oy = d.y + 5;
-  //     });
+    labels
+      .selectAll("text")
+      .data(piedata)
+      .enter()
+      .append("text")
+      .attr("text-anchor", "middle")
+      .attr("x", function(d) {
+        var a = d.startAngle + (d.endAngle - d.startAngle) / 2 - Math.PI / 2;
+        d.cx = Math.cos(a) * (radius - 75);
+        return (d.x = Math.cos(a) * (radius - 20));
+      })
+      .attr("y", function(d) {
+        var a = d.startAngle + (d.endAngle - d.startAngle) / 2 - Math.PI / 2;
+        d.cy = Math.sin(a) * (radius - 75);
+        return (d.y = Math.sin(a) * (radius - 20));
+      })
+      .text(function(d) {
+        return d.data.label;
+      })
+      .each(function(d) {
+        var bbox = this.getBBox();
+        d.sx = d.x - bbox.width / 2 - 2;
+        d.ox = d.x + bbox.width / 2 + 2;
+        d.sy = d.oy = d.y + 5;
+      });
 
-  //   /* labels.append("defs").append("marker")
-  //   .attr("id", "circ")
-  //   .attr("markerWidth", 6)
-  //   .attr("markerHeight", 6)
-  //   .attr("refX", 3)
-  //   .attr("refY", 3)
-  //   .append("circle")
-  //   .attr("cx", 3)
-  //   .attr("cy", 3)
-  //   .attr("r", 3); */
+    /* labels.append("defs").append("marker")
+    .attr("id", "circ")
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("refX", 3)
+    .attr("refY", 3)
+    .append("circle")
+    .attr("cx", 3)
+    .attr("cy", 3)
+    .attr("r", 3); */
 
-  //   labels
-  //     .selectAll("path.pointer")
-  //     .data(piedata)
-  //     .enter()
-  //     .append("path")
-  //     .attr("class", "pointer")
-  //     .style("fill", "none")
-  //     .style("stroke", "black")
-  //     .attr("marker-end", "url(#circ)")
-  //     .attr("d", function(d) {
-  //       if (d.cx > d.ox) {
-  //         return (
-  //           "M" +
-  //           d.sx +
-  //           "," +
-  //           d.sy +
-  //           "L" +
-  //           d.ox +
-  //           "," +
-  //           d.oy +
-  //           " " +
-  //           d.cx +
-  //           "," +
-  //           d.cy
-  //         );
-  //       } else {
-  //         return (
-  //           "M" +
-  //           d.ox +
-  //           "," +
-  //           d.oy +
-  //           "L" +
-  //           d.sx +
-  //           "," +
-  //           d.sy +
-  //           " " +
-  //           d.cx +
-  //           "," +
-  //           d.cy
-  //         );
-  //       }
-  //     });
-  // }
+    labels
+      .selectAll("path.pointer")
+      .data(piedata)
+      .enter()
+      .append("path")
+      .attr("class", "pointer")
+      .style("fill", "none")
+      .style("stroke", "black")
+      .attr("marker-end", "url(#circ)")
+      .attr("d", function(d) {
+        if (d.cx > d.ox) {
+          return (
+            "M" +
+            d.sx +
+            "," +
+            d.sy +
+            "L" +
+            d.ox +
+            "," +
+            d.oy +
+            " " +
+            d.cx +
+            "," +
+            d.cy
+          );
+        } else {
+          return (
+            "M" +
+            d.ox +
+            "," +
+            d.oy +
+            "L" +
+            d.sx +
+            "," +
+            d.sy +
+            " " +
+            d.cx +
+            "," +
+            d.cy
+          );
+        }
+      });
+  }
 
   drawPieChartTwo() {
     const width = 450;
@@ -1392,7 +1421,9 @@ export class HomeComponent implements OnInit {
       .data(data_ready)
       .enter()
       .append("path")
-      .attr("id", function(d,i) { return "arc_"+i; })
+      .attr("id", function(d, i) {
+        return "arc_" + i;
+      })
       .attr("d", arcGenerator)
       .attr("fill", function(d) {
         return color(d.data.key);
@@ -1407,12 +1438,14 @@ export class HomeComponent implements OnInit {
       .data(data_ready)
       .enter()
       .append("text")
-      .attr("x", function(d){
-        return d.data.value*7;
+      .attr("x", function(d) {
+        return d.data.value * 10;
       }) //Move the text from the start angle of the arc
-			.attr("dy", 18) //Move the text down
-		  .append("textPath")
-			.attr("xlink:href",function(d,i){return "#arc_"+i;})
+      .attr("dy", 18) //Move the text down
+      .append("textPath")
+      .attr("xlink:href", function(d, i) {
+        return "#arc_" + i;
+      })
       .text(function(d) {
         return "grp " + d.data.key;
       })
@@ -1423,31 +1456,170 @@ export class HomeComponent implements OnInit {
       .style("font-size", 17);
   }
 
-  signInWithGoogle() {
-    this.afAuth.auth
-      .signInWithPopup(new auth.GoogleAuthProvider())
-      .then(result => {
-        let user = {
-          id: "",
-          socialId: result.additionalUserInfo.profile["id"],
-          password: "12345",
-          token: result.credential["accessToken"],
-          name: result.user.displayName,
-          email: result.user.email,
-          photo: result.user.photoURL,
-          gender: "",
-          birthday: ""
-        };
-        this.db.database
-          .ref("users")
-          .push(user)
-          .then(data => {
-            // console.log("data is : ", data.key);
-            user.id = data.key;
-            this.userService.setUser(user);
-            localStorage.setItem("chat-user", JSON.stringify(user));
-            this.ngZone.run(() => this.router.navigate(["chat"]));
+  drawArcDiagram() {
+    var margin = { top: 0, right: 30, bottom: 50, left: 10 },
+      width = 1370 - margin.left - margin.right,
+      height = 695 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3
+      .select("#arc")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Read dummy data
+    d3.json(
+      "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_researcherNetwork.json",
+      function(data) {
+        // List of node names
+        var allNodes = data.nodes.map(function(d) {
+          return d.name;
+        });
+
+        // List of groups
+        var allGroups = data.nodes.map(function(d) {
+          return d.grp;
+        });
+        allGroups = new Set(allGroups);
+
+        // A color scale for groups:
+        var color = d3
+          .scaleOrdinal()
+          .domain(allGroups)
+          .range(["#ff0000", "#00ff00", "#0000ff", "#d3d3d3", "#000000", "#F4D03F", "#F43FE9", "#F49A3F", "##3FF4D3", "##3FA2F4", "#F45D3F", "#CE3FF4"]);
+
+        // A linear scale for node size
+        var size = d3
+          .scaleLinear()
+          .domain([1, 10])
+          .range([2, 10]);
+
+        // A linear scale to position the nodes on the X axis
+        var x = d3
+          .scalePoint()
+          .range([0, width])
+          .domain(allNodes);
+
+        // In my input data, links are provided between nodes -id-, NOT between node names.
+        // So I have to do a link between this id and the name
+        var idToNode = {};
+        data.nodes.forEach(function(n) {
+          idToNode[n.id] = n;
+        });
+
+        // Add the links
+        var links = svg
+          .selectAll("mylinks")
+          .data(data.links)
+          .enter()
+          .append("path")
+          .attr("d", function(d) {
+           let start = x(idToNode[d.source].name); // X position of start node on the X axis
+           let end = x(idToNode[d.target].name); // X position of end node
+            return [
+              "M",
+              start,
+              height - 30, // the arc starts at the coordinate x=start, y=height-30 (where the starting node is)
+              "A", // This means we're gonna build an elliptical arc
+              (start - end) / 2,
+              ",", // Next 2 lines are the coordinates of the inflexion point. Height of this point is proportional with start - end distance
+              (start - end) / 2,
+              0,
+              0,
+              ",",
+              start < end ? 1 : 0,
+              end,
+              ",",
+              height - 30
+            ] // We always want the arc on top. So if end is before start, putting 0 here turn the arc upside down.
+              .join(" ");
+          })
+          .style("fill", "none")
+          .attr("stroke", "grey")
+          .style("stroke-width", 1);
+
+        // Add the circle for the nodes
+        var nodes = svg
+          .selectAll("mynodes")
+          .data(
+            data.nodes.sort(function(a, b) {
+              return +b.n - +a.n;
+            })
+          )
+          .enter()
+          .append("circle")
+          .attr("cx", function(d) {
+            return x(d.name);
+          })
+          .attr("cy", height - 30)
+          .attr("r", function(d) {
+            return size(d.n);
+          })
+          .style("fill", function(d) {
+            return color(d.grp);
+          })
+          .attr("stroke", "white");
+
+        // And give them a label
+        var labels = svg
+          .selectAll("mylabels")
+          .data(data.nodes)
+          .enter()
+          .append("text")
+          .attr("x", 0)
+          .attr("y", 0)
+          .text(function(d) {
+            return d.name;
+          })
+          .style("text-anchor", "end")
+          .attr("transform", function(d) {
+            return (
+              "translate(" + x(d.name) + "," + (height - 15) + ")rotate(-45)"
+            );
+          })
+          .style("font-size", 6);
+
+        // Add the highlighting functionality
+        nodes
+          .on("mouseover", function(d) {
+            // Highlight the nodes: every node is green except of him
+            nodes.style("opacity", 0.2);
+            d3.select(this).style("opacity", 1);
+            // Highlight the connections
+            links
+              .style("stroke", function(link_d) {
+                return link_d.source === d.id || link_d.target === d.id
+                  ? color(d.grp)
+                  : "#b8b8b8";
+              })
+              .style("stroke-opacity", function(link_d) {
+                return link_d.source === d.id || link_d.target === d.id
+                  ? 1
+                  : 0.2;
+              })
+              .style("stroke-width", function(link_d) {
+                return link_d.source === d.id || link_d.target === d.id ? 4 : 1;
+              });
+            labels
+              .style("font-size", function(label_d) {
+                return label_d.name === d.name ? 16 : 2;
+              })
+              .attr("y", function(label_d) {
+                return label_d.name === d.name ? 10 : 0;
+              });
+          })
+          .on("mouseout", function(d) {
+            nodes.style("opacity", 1);
+            links
+              .style("stroke", "grey")
+              .style("stroke-opacity", 0.8)
+              .style("stroke-width", "1");
+            labels.style("font-size", 6);
           });
-      });
+      }
+    );
   }
 }
