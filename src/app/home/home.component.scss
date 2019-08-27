@@ -269,3 +269,18 @@ polyline{
 text {
   font-size:12px
 }
+
+#chart{
+  text-align: center;
+}
+
+.monthArc {
+  fill: white;
+  stroke: #AAAAAA;
+}
+
+.monthText {
+  fill: #6B6B6B;
+  font-size: 13px;
+  font-family: 'Courgette', sans-serif;
+}

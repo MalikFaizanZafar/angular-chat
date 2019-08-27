@@ -28,7 +28,8 @@ export class HomeComponent implements OnInit {
     // this.drawSankeyDiagram();
     // this.drawSunburstDiagram();
     // this.drawScatterBubble();
-    this.drawPieChart();
+    // this.drawPieChart();
+    this.drawPieChartTwo();
   }
 
   drawHeatMap() {
@@ -1165,185 +1166,261 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  drawPieChart() {
-    var width = 300,
-      height = 300,
-      radius = Math.min(width, height) / 2;
+  // drawPieChart() {
+  //   var width = 300,
+  //     height = 300,
+  //     radius = Math.min(width, height) / 2;
 
-    var color = d3.scaleOrdinal().range(["#6fc9e1", "#00627d", "#179bbf"]);
+  //   var color = d3.scaleOrdinal().range(["#6fc9e1", "#00627d", "#179bbf"]);
 
-    var biggestarc = d3
-      .arc()
-      .outerRadius(radius - 100)
-      .innerRadius(radius - 60);
+  //   var biggestarc = d3
+  //     .arc()
+  //     .outerRadius(radius - 100)
+  //     .innerRadius(radius - 60);
 
-    var bigarc = d3
-      .arc()
-      .outerRadius(radius - 100)
-      .innerRadius(radius - 60);
+  //   var bigarc = d3
+  //     .arc()
+  //     .outerRadius(radius - 100)
+  //     .innerRadius(radius - 60);
 
-    var smallarc = d3
-      .arc()
-      .outerRadius(radius - 100)
-      .innerRadius(radius - 60);
+  //   var smallarc = d3
+  //     .arc()
+  //     .outerRadius(radius - 100)
+  //     .innerRadius(radius - 60);
 
-    /*var biggerarc = d3.svg.arc()
-    .outerRadius(radius - 80)
-    .innerRadius(radius - 70);*/
+  //   /*var biggerarc = d3.svg.arc()
+  //   .outerRadius(radius - 80)
+  //   .innerRadius(radius - 70);*/
 
-    var pie = d3
-      .pie()
-      .sort(null)
+  //   var pie = d3
+  //     .pie()
+  //     .sort(null)
 
-      .value(function(d) {
-        return d.percent;
-      });
+  //     .value(function(d) {
+  //       return d.percent;
+  //     });
 
+  //   var svg = d3
+  //     .select("#pie")
+  //     .append("svg")
+  //     .attr("width", width)
+  //     .attr("height", height)
+  //     .append("g")
+  //     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+  //   var data = [
+  //     {
+  //       label: "Biggest",
+  //       percent: 33
+  //     },
+  //     {
+  //       label: "Big",
+  //       percent: 17
+  //     },
+  //     {
+  //       label: "Small",
+  //       percent: 50
+  //     }
+  //   ];
+
+  //   var piedata = pie(data);
+
+  //   var g = svg
+  //     .selectAll(".arc")
+  //     .data(piedata)
+  //     .enter()
+  //     .append("g")
+  //     .attr("class", "arc");
+
+  //   g.append("path")
+  //     .attr("d", function(d) {
+  //       if (d.data.label == "Biggest") {
+  //         return biggestarc(d);
+  //       } else if (d.data.label == "Big") {
+  //         return bigarc(d);
+  //       } else {
+  //         return smallarc(d);
+  //       }
+  //     })
+  //     .style("fill", function(d) {
+  //       return color(d.data.label);
+  //     });
+
+  //   g.append("text") //add a label to each slice
+  //     .attr("transform", function(d) {
+  //       //set the label's origin to the center of the arc
+  //       d.innerRadius = 0;
+  //       d.outerRadius = radius;
+  //       if (d.data.label == "Biggest") {
+  //         return "translate(" + biggestarc.centroid(d) + ")";
+  //       } else if (d.data.label == "Big") {
+  //         return "translate(" + bigarc.centroid(d) + ")";
+  //       } else {
+  //         return "translate(" + smallarc.centroid(d) + ")";
+  //       }
+  //     })
+  //     .attr("text-anchor", "middle")
+  //     .text(function(d, i) {
+  //       return data[i].percent + "%";
+  //     });
+
+  //   var labels = g.append("g").classed("labels", true);
+
+  //   labels
+  //     .selectAll("text")
+  //     .data(piedata)
+  //     .enter()
+  //     .append("text")
+  //     .attr("text-anchor", "middle")
+  //     .attr("x", function(d) {
+  //       var a = d.startAngle + (d.endAngle - d.startAngle) / 2 - Math.PI / 2;
+  //       d.cx = Math.cos(a) * (radius - 75);
+  //       return (d.x = Math.cos(a) * (radius - 20));
+  //     })
+  //     .attr("y", function(d) {
+  //       var a = d.startAngle + (d.endAngle - d.startAngle) / 2 - Math.PI / 2;
+  //       d.cy = Math.sin(a) * (radius - 75);
+  //       return (d.y = Math.sin(a) * (radius - 20));
+  //     })
+  //     .text(function(d) {
+  //       return d.data.label;
+  //     })
+  //     .each(function(d) {
+  //       var bbox = this.getBBox();
+  //       d.sx = d.x - bbox.width / 2 - 2;
+  //       d.ox = d.x + bbox.width / 2 + 2;
+  //       d.sy = d.oy = d.y + 5;
+  //     });
+
+  //   /* labels.append("defs").append("marker")
+  //   .attr("id", "circ")
+  //   .attr("markerWidth", 6)
+  //   .attr("markerHeight", 6)
+  //   .attr("refX", 3)
+  //   .attr("refY", 3)
+  //   .append("circle")
+  //   .attr("cx", 3)
+  //   .attr("cy", 3)
+  //   .attr("r", 3); */
+
+  //   labels
+  //     .selectAll("path.pointer")
+  //     .data(piedata)
+  //     .enter()
+  //     .append("path")
+  //     .attr("class", "pointer")
+  //     .style("fill", "none")
+  //     .style("stroke", "black")
+  //     .attr("marker-end", "url(#circ)")
+  //     .attr("d", function(d) {
+  //       if (d.cx > d.ox) {
+  //         return (
+  //           "M" +
+  //           d.sx +
+  //           "," +
+  //           d.sy +
+  //           "L" +
+  //           d.ox +
+  //           "," +
+  //           d.oy +
+  //           " " +
+  //           d.cx +
+  //           "," +
+  //           d.cy
+  //         );
+  //       } else {
+  //         return (
+  //           "M" +
+  //           d.ox +
+  //           "," +
+  //           d.oy +
+  //           "L" +
+  //           d.sx +
+  //           "," +
+  //           d.sy +
+  //           " " +
+  //           d.cx +
+  //           "," +
+  //           d.cy
+  //         );
+  //       }
+  //     });
+  // }
+
+  drawPieChartTwo() {
+    const width = 450;
+    const height = 450;
+    const margin = 40;
+
+    // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+    var radius = Math.min(width, height) / 2 - margin;
+
+    // append the svg object to the div called 'my_dataviz'
     var svg = d3
-      .select("#pie")
+      .select("#pietwo")
       .append("svg")
       .attr("width", width)
       .attr("height", height)
       .append("g")
       .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-    var data = [
-      {
-        label: "Biggest",
-        percent: 33
-      },
-      {
-        label: "Big",
-        percent: 17
-      },
-      {
-        label: "Small",
-        percent: 50
-      }
-    ];
+    // Create dummy data
+    var data = { a: 9, b: 20, c: 30, d: 8, e: 12 };
 
-    var piedata = pie(data);
+    // set the color scale
+    var color = d3
+      .scaleOrdinal()
+      .domain(data)
+      .range(["#ff0000", "#00ff00", "#0000ff", "#d3d3d3", "#f5f5f5"]);
 
-    var g = svg
-      .selectAll(".arc")
-      .data(piedata)
-      .enter()
-      .append("g")
-      .attr("class", "arc");
+    // Compute the position of each group on the pie:
+    var pie = d3.pie().value(function(d) {
+      return d.value;
+    });
+    var data_ready = pie(d3.entries(data));
+    // Now I know that group A goes from 0 degrees to x degrees and so on.
 
-    g.append("path")
-      .attr("d", function(d) {
-        if (d.data.label == "Biggest") {
-          return biggestarc(d);
-        } else if (d.data.label == "Big") {
-          return bigarc(d);
-        } else {
-          return smallarc(d);
-        }
-      })
-      .style("fill", function(d) {
-        return color(d.data.label);
-      });
+    // shape helper to build arcs:
+    var arcGenerator = d3
+      .arc()
+      .innerRadius(0)
+      .outerRadius(radius);
 
-    g.append("text") //add a label to each slice
-      .attr("transform", function(d) {
-        //set the label's origin to the center of the arc
-        d.innerRadius = 0;
-        d.outerRadius = radius;
-        if (d.data.label == "Biggest") {
-          return "translate(" + biggestarc.centroid(d) + ")";
-        } else if (d.data.label == "Big") {
-          return "translate(" + bigarc.centroid(d) + ")";
-        } else {
-          return "translate(" + smallarc.centroid(d) + ")";
-        }
-      })
-      .attr("text-anchor", "middle")
-      .text(function(d, i) {
-        return data[i].percent + "%";
-      });
-
-    var labels = g.append("g").classed("labels", true);
-
-    labels
-      .selectAll("text")
-      .data(piedata)
-      .enter()
-      .append("text")
-      .attr("text-anchor", "middle")
-      .attr("x", function(d) {
-        var a = d.startAngle + (d.endAngle - d.startAngle) / 2 - Math.PI / 2;
-        d.cx = Math.cos(a) * (radius - 75);
-        return (d.x = Math.cos(a) * (radius - 20));
-      })
-      .attr("y", function(d) {
-        var a = d.startAngle + (d.endAngle - d.startAngle) / 2 - Math.PI / 2;
-        d.cy = Math.sin(a) * (radius - 75);
-        return (d.y = Math.sin(a) * (radius - 20));
-      })
-      .text(function(d) {
-        return d.data.label;
-      })
-      .each(function(d) {
-        var bbox = this.getBBox();
-        d.sx = d.x - bbox.width / 2 - 2;
-        d.ox = d.x + bbox.width / 2 + 2;
-        d.sy = d.oy = d.y + 5;
-      });
-
-    /* labels.append("defs").append("marker")
-    .attr("id", "circ")
-    .attr("markerWidth", 6)
-    .attr("markerHeight", 6)
-    .attr("refX", 3)
-    .attr("refY", 3)
-    .append("circle")
-    .attr("cx", 3)
-    .attr("cy", 3)
-    .attr("r", 3); */
-
-    labels
-      .selectAll("path.pointer")
-      .data(piedata)
+    // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+    svg
+      .selectAll("mySlices")
+      .data(data_ready)
       .enter()
       .append("path")
-      .attr("class", "pointer")
-      .style("fill", "none")
-      .style("stroke", "black")
-      .attr("marker-end", "url(#circ)")
-      .attr("d", function(d) {
-        if (d.cx > d.ox) {
-          return (
-            "M" +
-            d.sx +
-            "," +
-            d.sy +
-            "L" +
-            d.ox +
-            "," +
-            d.oy +
-            " " +
-            d.cx +
-            "," +
-            d.cy
-          );
-        } else {
-          return (
-            "M" +
-            d.ox +
-            "," +
-            d.oy +
-            "L" +
-            d.sx +
-            "," +
-            d.sy +
-            " " +
-            d.cx +
-            "," +
-            d.cy
-          );
-        }
-      });
+      .attr("id", function(d,i) { return "arc_"+i; })
+      .attr("d", arcGenerator)
+      .attr("fill", function(d) {
+        return color(d.data.key);
+      })
+      .attr("stroke", "black")
+      .style("stroke-width", "2px")
+      .style("opacity", 0.7);
+
+    // Now add the annotation. Use the centroid method to get the best coordinates
+    svg
+      .selectAll("mySlices")
+      .data(data_ready)
+      .enter()
+      .append("text")
+      .attr("x", function(d){
+        return d.data.value*7;
+      }) //Move the text from the start angle of the arc
+			.attr("dy", 18) //Move the text down
+		  .append("textPath")
+			.attr("xlink:href",function(d,i){return "#arc_"+i;})
+      .text(function(d) {
+        return "grp " + d.data.key;
+      })
+      .attr("transform", function(d) {
+        return "translate(" + arcGenerator.centroid(d) + ")";
+      })
+      .style("text-anchor", "middle")
+      .style("font-size", 17);
   }
 
   signInWithGoogle() {
